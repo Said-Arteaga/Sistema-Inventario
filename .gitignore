@@ -1,17 +1,28 @@
-# Dependencias
+# Dependencias de Node.js (Evita subir gigas de basura)
 node_modules/
-/dist
-/build
+**/node_modules/
 
-# Temporales del sistema y Vite
-.vite/
-.DS_Store
-Thumbs.db
-
-# Variables de entorno (Contraseñas de bases de datos futuras)
+# Variables de entorno y contraseñas (¡CRÍTICO POR SEGURIDAD!)
 .env
 .env.local
 .env.*.local
+**/.env
+**/.env.*
 
-# Logs de errores
+# Carpetas de compilación y producción
+/dist
+/build
+.tscbuildinfo
+dist/
+build/
+
+# Temporales del sistema operativo y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs de errores comunes
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
