@@ -1,12 +1,16 @@
+import "dotenv/config";
 import express from 'express';
 import cors from 'cors';
-import { AppDataSource } from './config/data-source.js'; // Asegúrate de que la ruta sea correcta
+import { AppDataSource } from './src/config/data-source.js';
+import masterRouter from './src/routes/index.js';
 
 const app = express();
 const PORT = 5000;
 
 app.use(cors());
 app.use(express.json());
+
+app.use("/api", masterRouter);
 
 app.get('/api/saludo', (req, res) => {
     res.json({ mensaje: '¡Hola desde tu propio servidor Express!' });
@@ -15,7 +19,6 @@ app.get('/api/saludo', (req, res) => {
 AppDataSource.initialize()
     .then(() => {
         console.log("¡Conexión exitosa a la Base de Datos con TypeORM!");
-        
         app.listen(PORT, () => {
             console.log(`Servidor Express corriendo en http://localhost:${PORT}`);
         });
