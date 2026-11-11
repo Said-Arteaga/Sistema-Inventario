@@ -1,8 +1,8 @@
 import "dotenv/config";
 import express from 'express';
 import cors from 'cors';
-import { AppDataSource } from './src/config/data-source.js';
-import masterRouter from './src/routes/index.js';
+import { AppDataSource } from './config/data-source.js';
+import masterRouter from './routes/index.js';
 
 const app = express();
 const PORT = 5000;
