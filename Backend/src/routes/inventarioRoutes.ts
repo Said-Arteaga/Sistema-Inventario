@@ -45,4 +45,26 @@ router.post(
     InventarioController.agregarProductoAInventario
 );
 
+router.put(
+    "/consumir",
+    [
+        verificarToken,
+        body("idProducto").isInt().withMessage("El idProducto es obligatorio"),
+        body("idUsuario").isInt().withMessage("El idUsuario es obligatorio"),
+        body("cantidadConsumida").isFloat({ min: 0.01 }).withMessage("Cantidad inválida"),
+        validateResult
+    ],
+    InventarioController.consumirProducto
+);
+
+router.get(
+    "/familia/:idFamilia/movimientos",
+    [
+        verificarToken,
+        param("idFamilia").isInt().withMessage("El ID de la familia debe ser un número entero"),
+        validateResult
+    ],
+    InventarioController.obtenerMovimientosPorFamilia
+);
+
 export default router;

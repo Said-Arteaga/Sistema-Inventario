@@ -52,4 +52,49 @@ export class ListaComprasController {
             res.status(500).json({ mensaje: "Error al obtener detalles de la lista", error });
         }
     }
+
+    static async obtenerOCrearListaFamilia(req: Request, res: Response) {
+        try {
+            const { idFamilia } = req.params;
+            let lista = await listaRepository.findOne({
+                where: { idFamilia: Number(idFamilia) },
+                relations: { listaDetalles: { producto: true } },
+                order: { idLista: "DESC" }
+            });
+
+            if (!lista) {
+                lista = new ListaCompras();
+                lista.idFamilia = Number(idFamilia);
+                lista.fechaCreacion = new Date().toISOString().split('T')[0];
+                lista.estado = "Pendiente";
+                await listaRepository.save(lista);
+                lista.listaDetalles = [];
+            }
+
+            res.json(lista);
+        } catch (error) {
+            res.status(500).json({ mensaje: "Error al obtener lista de la familia", error });
+        }
+    }
+
+    static async toggleEstadoArticulo(req: Request, res: Response) {
+        try {
+            const { idDetalle } = req.params;
+            const detalle = await detalleRepository.findOne({
+                where: { idListaDetalle: Number(idDetalle) }
+            });
+
+            if (!detalle) {
+                res.status(404).json({ mensaje: "Artículo no encontrado" });
+                return;
+            }
+
+            detalle.estado = detalle.estado === "Comprado" ? "Por comprar" : "Comprado";
+            await detalleRepository.save(detalle);
+            res.json(detalle);
+        } catch (error) {
+            res.status(500).json({ mensaje: "Error al actualizar estado del artículo", error });
+        }
+    }
+
 }

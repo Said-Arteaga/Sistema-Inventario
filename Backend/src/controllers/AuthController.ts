@@ -10,9 +10,9 @@ const usuarioRepository = AppDataSource.getRepository(Usuario);
 const familiaRepository = AppDataSource.getRepository(Familia);
 
 export class AuthController {
-    static async registrar(req: Request, res: Response): Promise<void> {
+        static async registrar(req: Request, res: Response): Promise<void> {
         try {
-            const { nombreFamilia, nombreUsuario, correo, contrasenia } = req.body;
+            const { nombreFamilia, idFamilia, nombreUsuario, correo, contrasenia } = req.body;
 
             const usuarioExistente = await usuarioRepository.findOne({ where: { correo } });
             if (usuarioExistente) {
@@ -20,9 +20,21 @@ export class AuthController {
                 return;
             }
 
-            const nuevaFamilia = new Familia();
-            nuevaFamilia.nombre = nombreFamilia;
-            const familiaGuardada = await familiaRepository.save(nuevaFamilia);
+            let familiaFinal: Familia | null = null;
+            let rolAsignado = "Administrador";
+
+            if (idFamilia) {
+                familiaFinal = await familiaRepository.findOne({ where: { idFamilia: Number(idFamilia) } });
+                if (!familiaFinal) {
+                    res.status(404).json({ mensaje: "No existe ningún hogar con ese código." });
+                    return;
+                }
+                rolAsignado = "Miembro";
+            } else {
+                const nuevaFamilia = new Familia();
+                nuevaFamilia.nombre = nombreFamilia;
+                familiaFinal = await familiaRepository.save(nuevaFamilia);
+            }
 
             const contraseniaEncriptada = await bcrypt.hash(contrasenia, 10);
 
@@ -30,18 +42,18 @@ export class AuthController {
             nuevoUsuario.nombre = nombreUsuario;
             nuevoUsuario.correo = correo;
             nuevoUsuario.contrasenia = contraseniaEncriptada;
-            nuevoUsuario.rol = "Administrador";
-            nuevoUsuario.idFamilia = familiaGuardada.idFamilia;
+            nuevoUsuario.rol = rolAsignado;
+            nuevoUsuario.idFamilia = familiaFinal.idFamilia;
 
             await usuarioRepository.save(nuevoUsuario);
 
             const { contrasenia: _, ...usuarioSinContrasenia } = nuevoUsuario;
-
             res.status(201).json({ mensaje: "Registro exitoso", usuario: usuarioSinContrasenia });
         } catch (error) {
             res.status(500).json({ mensaje: "Error en el servidor al registrar", error });
         }
     }
+
 
     static async login(req: Request, res: Response): Promise<void> {
         try {
@@ -84,4 +96,18 @@ export class AuthController {
             res.status(500).json({ mensaje: "Error en el servidor al iniciar sesión", error });
         }
     }
+
+    static async listarMiembrosFamilia(req: Request, res: Response): Promise<void> {
+        try {
+            const { idFamilia } = req.params;
+            const miembros = await usuarioRepository.find({
+                where: { idFamilia: Number(idFamilia) },
+                select: { idUsuario: true, nombre: true, correo: true, rol: true }
+            });
+            res.json(miembros);
+        } catch (error) {
+            res.status(500).json({ mensaje: "Error al obtener integrantes del hogar", error });
+        }
+    }
+
 }

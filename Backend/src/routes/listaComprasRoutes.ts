@@ -39,4 +39,25 @@ router.get(
     ListaComprasController.obtenerListaConDetalles
 );
 
+router.get(
+    "/familia/:idFamilia",
+    [
+        verificarToken,
+        param("idFamilia").isInt().withMessage("El ID de la familia debe ser un número entero"),
+        validateResult
+    ],
+    ListaComprasController.obtenerOCrearListaFamilia
+);
+
+router.put(
+    "/articulo/:idDetalle/toggle",
+    [
+        verificarToken,
+        param("idDetalle").isInt().withMessage("El ID del detalle debe ser un número entero"),
+        validateResult
+    ],
+    ListaComprasController.toggleEstadoArticulo
+);
+
+
 export default router;
