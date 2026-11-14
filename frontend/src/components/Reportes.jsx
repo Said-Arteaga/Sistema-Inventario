@@ -1,25 +1,35 @@
 import { Plus, ChevronRight, Sparkles } from 'lucide-react';
 
-export function Reportes({ busqueda = '', onAbrirModal }) {
-  // Métricas idénticas a tu captura de pantalla
+export function Reportes({ busqueda = '', onAbrirModal, productos = [], movimientos = [] }) {
+  // Calculamos métricas reales a partir del inventario
+  const gastoTotal = movimientos.reduce((acum, mov) => {
+    return acum + Number(mov.costo || 0);
+  }, 0);
+
+  const totalUnidades = productos.reduce((acum, prod) => {
+    const cant = Number(prod.inventarios?.[0]?.detallesInventario?.[0]?.cantidad || 0);
+    return acum + cant;
+  }, 0);
+
+
+  const categoriasActivas = new Set(productos.map((p) => p.categoria)).size;
+
   const metricas = [
-    { id: 1, titulo: 'Gasto mensual', valor: '$2,840', comparativa: '-12% vs. mes anterior' },
-    { id: 2, titulo: 'Productos consumidos', valor: '172', comparativa: '+6% este mes' },
-    { id: 3, titulo: 'Desperdicio evitado', valor: '8.4 kg', comparativa: '+18% vs. mes anterior' },
-    { id: 4, titulo: 'Ahorro estimado', valor: '$640', comparativa: '+15% este mes' },
+    { id: 1, titulo: 'Gasto registrado', valor: `$${gastoTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`, comparativa: 'Total acumulado en inventario' },
+    { id: 2, titulo: 'Productos distintos', valor: `${productos.length}`, comparativa: 'Artículos registrados en hogar' },
+    { id: 3, titulo: 'Unidades en stock', valor: `${totalUnidades}`, comparativa: 'Suma total de existencias' },
+    { id: 4, titulo: 'Categorías activas', valor: `${categoriasActivas}`, comparativa: 'De 6 categorías disponibles' },
   ];
 
-  // Filtramos por la barra de búsqueda superior
   const metricasFiltradas = metricas.filter((m) =>
     m.titulo.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   return (
     <div className="dashboard-container">
-      {/* Cabecera idéntica a tu captura */}
       <div className="subpage-header">
         <div>
-          <span className="date-label">CASA MARTÍNEZ</span>
+          <span className="date-label">MI HOGAR</span>
           <h2>Reportes</h2>
           <p>Conoce mejor el consumo y los gastos de tu hogar.</p>
         </div>
@@ -29,7 +39,6 @@ export function Reportes({ busqueda = '', onAbrirModal }) {
         </button>
       </div>
 
-      {/* Cuadrícula de 2 columnas con tarjetas métricas verticales */}
       <div className="two-col-grid">
         {metricasFiltradas.map((item) => (
           <div 
@@ -53,12 +62,11 @@ export function Reportes({ busqueda = '', onAbrirModal }) {
         ))}
       </div>
 
-      {/* Banner inferior de Modo Local Activo */}
       <div className="local-mode-banner">
         <div className="banner-left">
           <Sparkles size={16} color="#3b5d44" />
           <span>
-            <strong>Modo local activo</strong> · Conecta el backend para compartir cambios entre todos los miembros del hogar.
+            <strong>Conectado al servidor</strong> · Indicadores calculados con los costos de tu inventario.
           </span>
         </div>
         <ChevronRight size={16} color="#888" />

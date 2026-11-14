@@ -1,42 +1,62 @@
 import { useState } from 'react';
 import { X, ArrowRight } from 'lucide-react';
+import { agregarProductoBackend } from '../services/api';
 
-export function AgregarProducto({ abierto, onCerrar, onGuardar }) {
+export function AgregarProducto({ abierto, onCerrar, onGuardar, usuario }) {
   const [nombre, setNombre] = useState('');
+  const [presentacion, setPresentacion] = useState('Paquete');
+  const [categoria, setCategoria] = useState('Lácteos');
   const [cantidad, setCantidad] = useState('1');
-  const [unidad, setUnidad] = useState('unidades');
+  const [unidadMedida, setUnidadMedida] = useState('unidades');
   const [ubicacion, setUbicacion] = useState('Refrigerador');
-  const [caducidad, setCaducidad] = useState('');
-  const [precio, setPrecio] = useState('');
+  const [fechaCaducidad, setFechaCaducidad] = useState('');
+  const [costo, setCosto] = useState('');
+  const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState('');
 
   if (!abierto) return null;
 
-  const manejarEnvio = (e) => {
+  const manejarEnvio = async (e) => {
     e.preventDefault();
     if (!nombre.trim()) return;
+    setError('');
+    setGuardando(true);
 
-    const nuevoProducto = {
-      id: Date.now(),
-      emoji: '📦',
-      nombre: nombre.trim(),
-      cantidad: `${cantidad} ${unidad}`,
-      ubicacion,
-      caducidad,
-      precio: precio ? `$${precio}` : '$0.00',
-      estado: 'En buen estado',
-      alerta: 'green',
-    };
+    try {
+      // Si no eligió fecha, ponemos 7 días por defecto para cumplir con isDate() del backend
+      const fechaDefecto = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0];
 
-    if (onGuardar) onGuardar(nuevoProducto);
+      const payload = {
+        idFamilia: usuario.idFamilia,
+        idUsuario: usuario.idUsuario,
+        nombre: nombre.trim(),
+        presentacion: presentacion.trim() || 'Estándar',
+        unidadMedida,
+        categoria,
+        ubicacion,
+        fechaCaducidad: fechaCaducidad || fechaDefecto,
+        cantidad: Number(cantidad),
+        costo: Number(costo) || 0,
+      };
 
-    // Limpiamos y cerramos
-    setNombre('');
-    setCantidad('1');
-    setUnidad('unidades');
-    setUbicacion('Refrigerador');
-    setCaducidad('');
-    setPrecio('');
-    onCerrar();
+      const respuesta = await agregarProductoBackend(payload);
+
+      if (onGuardar) onGuardar(respuesta.producto);
+
+      // Limpiamos y cerramos
+      setNombre('');
+      setPresentacion('Paquete');
+      setCantidad('1');
+      setFechaCaducidad('');
+      setCosto('');
+      onCerrar();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setGuardando(false);
+    }
   };
 
   return (
@@ -64,10 +84,11 @@ export function AgregarProducto({ abierto, onCerrar, onGuardar }) {
           padding: '28px 32px',
           boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
           position: 'relative',
+          maxHeight: '92vh',
+          overflowY: 'auto',
         }}
       >
-        {/* Cabecera del Modal */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
           <div>
             <span className="date-label" style={{ display: 'block', marginBottom: '4px' }}>
               NUEVO REGISTRO
@@ -94,9 +115,20 @@ export function AgregarProducto({ abierto, onCerrar, onGuardar }) {
           </button>
         </div>
 
-        {/* Formulario */}
-        <form onSubmit={manejarEnvio} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Nombre del producto */}
+        {error && (
+          <div style={{
+            backgroundColor: '#fdecea',
+            color: '#b71c1c',
+            padding: '10px 14px',
+            borderRadius: '10px',
+            fontSize: '0.82rem',
+            marginBottom: '14px',
+          }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={manejarEnvio} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div>
             <label style={labelStyle}>Nombre del producto</label>
             <input
@@ -110,7 +142,31 @@ export function AgregarProducto({ abierto, onCerrar, onGuardar }) {
             />
           </div>
 
-          {/* Fila: Cantidad y Unidad */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div>
+              <label style={labelStyle}>Categoría</label>
+              <select value={categoria} onChange={(e) => setCategoria(e.target.value)} style={inputStyle}>
+                <option value="Frutas y verduras">Frutas y verduras</option>
+                <option value="Lácteos">Lácteos</option>
+                <option value="Carnes">Carnes</option>
+                <option value="Despensa">Despensa</option>
+                <option value="Limpieza">Limpieza</option>
+                <option value="Cuidado personal">Cuidado personal</option>
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Presentación</label>
+              <input
+                type="text"
+                placeholder="Ej. Botella, Caja, Bolsa"
+                value={presentacion}
+                onChange={(e) => setPresentacion(e.target.value)}
+                required
+                style={inputStyle}
+              />
+            </div>
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
               <label style={labelStyle}>Cantidad</label>
@@ -120,12 +176,13 @@ export function AgregarProducto({ abierto, onCerrar, onGuardar }) {
                 step="any"
                 value={cantidad}
                 onChange={(e) => setCantidad(e.target.value)}
+                required
                 style={inputStyle}
               />
             </div>
             <div>
               <label style={labelStyle}>Unidad</label>
-              <select value={unidad} onChange={(e) => setUnidad(e.target.value)} style={inputStyle}>
+              <select value={unidadMedida} onChange={(e) => setUnidadMedida(e.target.value)} style={inputStyle}>
                 <option value="unidades">unidades</option>
                 <option value="g">g</option>
                 <option value="kg">kg</option>
@@ -136,7 +193,6 @@ export function AgregarProducto({ abierto, onCerrar, onGuardar }) {
             </div>
           </div>
 
-          {/* Ubicación */}
           <div>
             <label style={labelStyle}>Ubicación</label>
             <select value={ubicacion} onChange={(e) => setUbicacion(e.target.value)} style={inputStyle}>
@@ -146,34 +202,35 @@ export function AgregarProducto({ abierto, onCerrar, onGuardar }) {
             </select>
           </div>
 
-          {/* Fila: Fecha de caducidad y Precio */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
               <label style={labelStyle}>Fecha de caducidad</label>
               <input
                 type="date"
-                value={caducidad}
-                onChange={(e) => setCaducidad(e.target.value)}
+                value={fechaCaducidad}
+                onChange={(e) => setFechaCaducidad(e.target.value)}
                 style={inputStyle}
               />
             </div>
             <div>
-              <label style={labelStyle}>Precio</label>
+              <label style={labelStyle}>Precio ($)</label>
               <input
-                type="text"
-                placeholder="$ 0.00"
-                value={precio}
-                onChange={(e) => setPrecio(e.target.value)}
+                type="number"
+                min="0"
+                step="any"
+                placeholder="0.00"
+                value={costo}
+                onChange={(e) => setCosto(e.target.value)}
                 style={inputStyle}
               />
             </div>
           </div>
 
-          {/* Botón Guardar */}
           <button
             type="submit"
+            disabled={guardando}
             style={{
-              marginTop: '8px',
+              marginTop: '6px',
               backgroundColor: '#486851',
               color: '#ffffff',
               border: 'none',
@@ -188,7 +245,7 @@ export function AgregarProducto({ abierto, onCerrar, onGuardar }) {
               cursor: 'pointer',
             }}
           >
-            <span>Guardar producto</span>
+            <span>{guardando ? 'Guardando en BD...' : 'Guardar producto'}</span>
             <ArrowRight size={16} />
           </button>
         </form>
