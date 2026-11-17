@@ -6,8 +6,6 @@ import { DetalleInventario } from "../entities/DetalleInventario.js";
 import { HistoricoMovimientos } from "../entities/HistoricoMovimientos.js";
 
 const productoRepository = AppDataSource.getRepository(Producto);
-const inventarioRepository = AppDataSource.getRepository(Inventario);
-const detalleRepository = AppDataSource.getRepository(DetalleInventario);
 const historicoRepository = AppDataSource.getRepository(HistoricoMovimientos);
 
 export class InventarioController {

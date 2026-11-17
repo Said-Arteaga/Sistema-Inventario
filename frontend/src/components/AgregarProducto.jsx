@@ -23,7 +23,6 @@ export function AgregarProducto({ abierto, onCerrar, onGuardar, usuario }) {
     setGuardando(true);
 
     try {
-      // Si no eligió fecha, ponemos 7 días por defecto para cumplir con isDate() del backend
       const fechaDefecto = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split('T')[0];
@@ -45,7 +44,6 @@ export function AgregarProducto({ abierto, onCerrar, onGuardar, usuario }) {
 
       if (onGuardar) onGuardar(respuesta.producto);
 
-      // Limpiamos y cerramos
       setNombre('');
       setPresentacion('Paquete');
       setCantidad('1');

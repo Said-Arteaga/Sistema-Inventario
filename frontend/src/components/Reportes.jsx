@@ -1,7 +1,6 @@
 import { Plus, ChevronRight, Sparkles } from 'lucide-react';
 
 export function Reportes({ busqueda = '', onAbrirModal, productos = [], movimientos = [] }) {
-  // Calculamos métricas reales a partir del inventario
   const gastoTotal = movimientos.reduce((acum, mov) => {
     return acum + Number(mov.costo || 0);
   }, 0);

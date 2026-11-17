@@ -8,7 +8,6 @@ const getHeaders = () => {
   };
 };
 
-// Helper centralizado para manejar respuestas y detectar tokens expirados
 const manejarRespuesta = async (res, mensajePorDefecto) => {
   if (res.status === 401 || res.status === 403) {
     localStorage.removeItem('token');
@@ -25,7 +24,6 @@ const manejarRespuesta = async (res, mensajePorDefecto) => {
   return data;
 };
 
-// --- AUTENTICACIÓN ---
 export const loginUsuario = async (correo, contrasenia) => {
   const res = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
@@ -51,7 +49,6 @@ export const registrarUsuario = async (datos) => {
   return data;
 };
 
-// --- INVENTARIO Y STOCK ---
 export const obtenerStockFamilia = async (idFamilia) => {
   const res = await fetch(`${API_URL}/inventario/familia/${idFamilia}/stock`, {
     headers: getHeaders(),
@@ -77,7 +74,6 @@ export const consumirProductoBackend = async (idProducto, idUsuario, cantidadCon
   return manejarRespuesta(res, 'Error al registrar consumo');
 };
 
-// --- LISTA DE COMPRAS ---
 export const obtenerListaFamilia = async (idFamilia) => {
   const res = await fetch(`${API_URL}/compras/familia/${idFamilia}`, {
     headers: getHeaders(),
@@ -102,7 +98,6 @@ export const toggleArticuloListaBackend = async (idDetalle) => {
   return manejarRespuesta(res, 'Error al actualizar artículo');
 };
 
-// --- HISTORIAL DE MOVIMIENTOS ---
 export const obtenerMovimientosFamilia = async (idFamilia) => {
   const res = await fetch(`${API_URL}/inventario/familia/${idFamilia}/movimientos`, {
     headers: getHeaders(),

@@ -96,5 +96,4 @@ export class ListaComprasController {
             res.status(500).json({ mensaje: "Error al actualizar estado del artículo", error });
         }
     }
-
 }

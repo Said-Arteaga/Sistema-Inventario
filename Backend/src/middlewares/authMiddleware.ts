@@ -20,7 +20,6 @@ export const verificarToken = (req: CustomRequest, res: Response, next: NextFunc
         const verificado: any = jwt.verify(token, JWT_SECRET);
         req.usuarioToken = verificado;
 
-        // Validar que el usuario solo acceda a su propia familia
         const idFamiliaParam = req.params?.idFamilia;
         const idFamiliaBody = req.body?.idFamilia;
 

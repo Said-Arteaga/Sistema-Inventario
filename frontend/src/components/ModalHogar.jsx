@@ -89,7 +89,7 @@ export function ModalHogar({ abierto, onCerrar, usuario }) {
           </button>
         </div>
 
-        {/* Código de invitación para nuevos miembros */}
+        { }
         <div style={{
           backgroundColor: '#f4f7f5',
           border: '1px solid #dce5de',
@@ -131,7 +131,7 @@ export function ModalHogar({ abierto, onCerrar, usuario }) {
           </button>
         </div>
 
-        {/* Lista de integrantes */}
+        { }
         <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px', color: '#3a403c', fontSize: '0.85rem', fontWeight: '600' }}>
           <Users size={16} color="#3b5d44" />
           <span>Integrantes registrados ({miembros.length})</span>

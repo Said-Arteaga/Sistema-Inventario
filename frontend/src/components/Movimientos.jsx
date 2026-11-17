@@ -11,7 +11,6 @@ export function Movimientos({ busqueda = '', onAbrirModal, movimientos = [], usu
 
   const nombreHogar = usuario?.familia?.nombre || 'Mi Hogar';
 
-  // Transformamos los registros de HistoricoMovimientos al formato visual
   const movimientosFormateados = movimientos.map((mov) => {
     const nombreUser = mov.usuario?.nombre || usuario?.nombre || 'Usuario';
     const nombreProd = mov.producto?.nombre || 'Producto';

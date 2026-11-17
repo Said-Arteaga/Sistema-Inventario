@@ -44,7 +44,7 @@ export function ListaCompras({
         </button>
       </div>
 
-      {/* Formulario rápido conectado al backend para añadir productos a la lista */}
+      { }
       <form 
         onSubmit={manejarAgregarRapido} 
         style={{

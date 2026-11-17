@@ -109,5 +109,4 @@ export class AuthController {
             res.status(500).json({ mensaje: "Error al obtener integrantes del hogar", error });
         }
     }
-
 }
